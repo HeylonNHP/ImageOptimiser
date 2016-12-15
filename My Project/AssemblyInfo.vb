@@ -10,9 +10,9 @@ Imports System.Runtime.InteropServices
 
 <Assembly: AssemblyTitle("ImageOptimiser")> 
 <Assembly: AssemblyDescription("")> 
-<Assembly: AssemblyCompany("Hewlett-Packard")> 
+<Assembly: AssemblyCompany("Nuclear Heylon Productions")> 
 <Assembly: AssemblyProduct("ImageOptimiser")> 
-<Assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2016")> 
+<Assembly: AssemblyCopyright("Copyright © NHP 2016")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>

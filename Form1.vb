@@ -1,4 +1,6 @@
 ﻿Imports System.IO
+Imports System.Threading
+
 Public Class Form1
 #Region "Basic functions"
     Private Function convertBytesToAppropriateScale(bytes As Integer, Optional precision As Integer = 2)
@@ -16,6 +18,30 @@ Public Class Form1
             Return bytes.ToString
         End If
     End Function
+#End Region
+
+#Region "Optimise"
+    Private Sub optimiseImages()
+        For Each item As ListViewItem In ListView1.Items
+            Dim currentFile As New FileInfo(item.Tag)
+
+            'Get current path without extention
+            Dim outputFilename As String = currentFile.FullName.Substring(0, currentFile.FullName.Length - currentFile.Extension.Length)
+
+            'Detirmine file type and apply appropriate optimisation
+            If currentFile.Extension.ToLower = ".jpg" Or currentFile.Extension.ToLower = ".jpeg" Then
+                Dim jpegOptimWCB As WaitCallback = New WaitCallback(AddressOf optimiseJPEGthread)
+                ThreadPool.QueueUserWorkItem(jpegOptimWCB, {currentFile.FullName, outputFilename})
+            End If
+        Next
+    End Sub
+
+    Private Sub optimiseJPEGthread(parameters As Array)
+        optimiseJPEG(parameters(0), parameters(1))
+    End Sub
+    Private Sub optimiseJPEG(inputFilePath As String, outputFilePath As String)
+        Me.Invoke(Sub() ListView1.Items.Add("Test threading"))
+    End Sub
 #End Region
     Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
 
@@ -40,8 +66,13 @@ Public Class Form1
             Dim currentFile As New FileInfo(path)
             Dim newItem As New ListViewItem
             newItem.Text = currentFile.Name
+            newItem.Tag = currentFile.FullName
             newItem.SubItems.Add(convertBytesToAppropriateScale(currentFile.Length))
             ListView1.Items.Add(newItem)
         Next
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        optimiseImages()
     End Sub
 End Class
