@@ -7,3 +7,4 @@ C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\Im
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.exe
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.xml
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.pdb
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.pdb
