@@ -1,1 +1,9 @@
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.exe.config
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.exe
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.xml
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Form1.resources
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Resources.resources
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.vbproj.GenerateResource.Cache
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.exe
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.xml
+C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.pdb
