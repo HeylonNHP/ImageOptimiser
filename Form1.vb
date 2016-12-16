@@ -21,31 +21,38 @@ Public Class Form1
 #End Region
 
 #Region "Optimise"
+    Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "C:\Users\Heylon2\PycharmProjects\JPEGtran_optimiser\jpegtran.exe"
     Private Sub optimiseImages()
 
-        For Each item As ListViewItem In ListView1.Items
+        For i As Integer = 0 To ListView1.Items.Count - 1
+            Dim item As ListViewItem = ListView1.Items.Item(i)
             Dim currentFile As New FileInfo(item.Tag)
 
             'Get current path without extention
-            Dim outputFilename As String = currentFile.FullName.Substring(0, currentFile.FullName.Length - currentFile.Extension.Length)
+            Dim outputFilename As String
+            If ToolStripMenuItem2.CheckState = CheckState.Checked Then
+                outputFilename = currentFile.FullName.Substring(0, currentFile.FullName.Length - currentFile.Extension.Length)
+            Else
+                outputFilename = saveLocation + currentFile.Name.Substring(0, currentFile.Name.Length - currentFile.Extension.Length)
+            End If
 
             'Detirmine file type and apply appropriate optimisation
             If currentFile.Extension.ToLower = ".jpg" Or currentFile.Extension.ToLower = ".jpeg" Then
                 Dim jpegOptimWCB As WaitCallback = New WaitCallback(AddressOf optimiseJPEGthread)
-                ThreadPool.QueueUserWorkItem(jpegOptimWCB, {currentFile.FullName, outputFilename})
+                ThreadPool.QueueUserWorkItem(jpegOptimWCB, {currentFile.FullName, outputFilename, i})
             End If
         Next
     End Sub
 
     Private Sub optimiseJPEGthread(parameters As Array)
-        optimiseJPEG(parameters(0), parameters(1))
+        optimiseJPEG(parameters(0), parameters(1), parameters(2))
     End Sub
-    Private Sub optimiseJPEG(inputFilePath As String, outputFilePath As String)
+    Private Sub optimiseJPEG(inputFilePath As String, outputFilePath As String, itemIndex As Integer)
         Dim inputFileInfo As New FileInfo(inputFilePath)
         outputFilePath = getNonExistingPath(outputFilePath, inputFileInfo.Extension)
 
-        updatedProcessingListViewItem(inputFileInfo.FullName)
+        updateProcessingListViewItem(itemIndex)
 
         Dim JPEGtranProcess As New Process
 
@@ -66,54 +73,61 @@ Public Class Form1
         End While
 
         Try
-            My.Computer.FileSystem.DeleteFile(inputFilePath)
-            My.Computer.FileSystem.RenameFile(outputFilePath, inputFileInfo.Name)
+            If ToolStripMenuItem2.CheckState = CheckState.Checked Then
+                My.Computer.FileSystem.DeleteFile(inputFilePath)
+                My.Computer.FileSystem.RenameFile(outputFilePath, inputFileInfo.Name)
+                updateFinishedListViewItem(itemIndex, inputFilePath)
+            Else
+                updateFinishedListViewItem(itemIndex, outputFilePath)
+            End If
+
         Catch ex As Exception
 
         End Try
 
-        updateFinishedListViewItem(inputFilePath)
         Debug.Print(inputFilePath + " Ended")
     End Sub
 
-    Private Sub updatedProcessingListViewItem(filePath As String)
-        For i As Integer = 0 To ListView1.Items.Count - 1
-            Dim currentItem As ListViewItem
-            Me.Invoke(Sub() currentItem = ListView1.Items.Item(i))
+    Private Sub updateProcessingListViewItem(itemIndex As Integer)
+        Dim currentItem As ListViewItem
+        Me.Invoke(Sub() currentItem = ListView1.Items.Item(itemIndex))
 
-            If currentItem.Tag = filePath Then
-                Dim newItem As ListViewItem = currentItem
-                Me.Invoke(Sub() newItem.SubItems.Add(""))
-                Me.Invoke(Sub() newItem.SubItems.Add(""))
-                Me.Invoke(Sub() newItem.SubItems.Add("Processing"))
-            End If
-        Next
+        Dim newItem As ListViewItem = currentItem
+        'If the listview item is already set to "Done" simply change the value, instead of trying to create new subitems
+        If newItem.SubItems.Count > 2 Then
+            Me.Invoke(Sub() newItem.SubItems.Item(2).Text = "")
+            Me.Invoke(Sub() newItem.SubItems.Item(3).Text = "")
+            Me.Invoke(Sub() newItem.SubItems.Item(4).Text = "Processing")
+        Else
+            Me.Invoke(Sub() newItem.SubItems.Add(""))
+            Me.Invoke(Sub() newItem.SubItems.Add(""))
+            Me.Invoke(Sub() newItem.SubItems.Add("Processing"))
+        End If
+
     End Sub
-    Private Sub updateFinishedListViewItem(filePath As String)
-        For i As Integer = 0 To ListView1.Items.Count - 1
-            Dim currentItem As ListViewItem
-            Me.Invoke(Sub() currentItem = ListView1.Items.Item(i))
+    Private Sub updateFinishedListViewItem(itemIndex As Integer, outputFilePath As String)
 
-            If currentItem.Tag = filePath Then
-                Dim currentFileInfo As New FileInfo(filePath)
-                Dim newItem As New ListViewItem
-                newItem.Text = currentItem.Text
-                newItem.Tag = currentItem.Tag
+        Dim currentItem As ListViewItem
+        Me.Invoke(Sub() currentItem = ListView1.Items.Item(itemIndex))
 
-                newItem.SubItems.Add(currentItem.SubItems.Item(1).Text)
-                newItem.SubItems.Item(1).Tag = currentItem.SubItems.Item(1).Tag
+        Dim currentFileInfo As New FileInfo(outputFilePath)
+        Dim newItem As New ListViewItem
+        newItem.Text = currentItem.Text
+        newItem.Tag = currentItem.Tag
 
-                newItem.SubItems.Add(convertBytesToAppropriateScale(currentFileInfo.Length))
-                newItem.SubItems.Item(2).Tag = currentFileInfo.Length
+        newItem.SubItems.Add(currentItem.SubItems.Item(1).Text)
+        newItem.SubItems.Item(1).Tag = currentItem.SubItems.Item(1).Tag
 
-                Dim spaceSavedPercentage = Math.Round((Val(currentItem.SubItems.Item(1).Tag) / currentFileInfo.Length) * 100 - 100, 2)
+        newItem.SubItems.Add(convertBytesToAppropriateScale(currentFileInfo.Length))
+        newItem.SubItems.Item(2).Tag = currentFileInfo.Length
 
-                newItem.SubItems.Add(spaceSavedPercentage.ToString + "%")
-                newItem.SubItems.Add("Done")
+        Dim spaceSavedPercentage = Math.Round((Val(currentItem.SubItems.Item(1).Tag) / currentFileInfo.Length) * 100 - 100, 2)
 
-                Me.Invoke(Sub() ListView1.Items.Item(i) = newItem)
-            End If
-        Next
+        newItem.SubItems.Add(spaceSavedPercentage.ToString + "%")
+        newItem.SubItems.Add("Done")
+
+        Me.Invoke(Sub() ListView1.Items.Item(itemIndex) = newItem)
+
     End Sub
     Private Function getNonExistingPath(inputPath As String, extention As String)
         Dim count = 0
@@ -169,6 +183,21 @@ Public Class Form1
             For i As Integer = ListView1.SelectedIndices.Count - 1 To 0 Step -1
                 ListView1.Items.RemoveAt(ListView1.SelectedIndices(i))
             Next
+        End If
+    End Sub
+
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        Me.Close()
+    End Sub
+
+    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click
+        Dim fbd As New FolderBrowserDialog
+        If fbd.ShowDialog() = Windows.Forms.DialogResult.OK Then
+            If Not fbd.SelectedPath.Substring(fbd.SelectedPath.Length - 1, 1) = "\" Then
+                saveLocation = fbd.SelectedPath + "\"
+            Else
+                saveLocation = fbd.SelectedPath
+            End If
         End If
     End Sub
 End Class
