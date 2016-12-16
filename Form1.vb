@@ -22,9 +22,9 @@ Public Class Form1
 
 #Region "Optimise"
     Public saveLocation As String = ""
-    Public Const JPEGtranLocation As String = "C:\Users\Heylon2\PycharmProjects\JPEGtran_optimiser\jpegtran.exe"
+    Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Private Sub optimiseImages()
-
+        Button1.Enabled = False
         For i As Integer = 0 To ListView1.Items.Count - 1
             Dim item As ListViewItem = ListView1.Items.Item(i)
             Dim currentFile As New FileInfo(item.Tag)
@@ -47,6 +47,15 @@ Public Class Form1
 
     Private Sub optimiseJPEGthread(parameters As Array)
         optimiseJPEG(parameters(0), parameters(1), parameters(2))
+
+        'Re-enable optimise button if this is the last image that has been optimised
+        
+        Dim worker As Integer = 0
+        Dim io As Integer = 0
+        ThreadPool.GetAvailableThreads(worker, io)
+        If (worker >= Environment.ProcessorCount - 1 And io >= Environment.ProcessorCount - 1) Then
+            Me.Invoke(Sub() Button1.Enabled = True)
+        End If
     End Sub
     Private Sub optimiseJPEG(inputFilePath As String, outputFilePath As String, itemIndex As Integer)
         Dim inputFileInfo As New FileInfo(inputFilePath)
@@ -94,6 +103,7 @@ Public Class Form1
 
         Dim newItem As ListViewItem = currentItem
         'If the listview item is already set to "Done" simply change the value, instead of trying to create new subitems
+        Me.Invoke(Sub() ListView1.BeginUpdate())
         If newItem.SubItems.Count > 2 Then
             Me.Invoke(Sub() newItem.SubItems.Item(2).Text = "")
             Me.Invoke(Sub() newItem.SubItems.Item(3).Text = "")
@@ -103,7 +113,7 @@ Public Class Form1
             Me.Invoke(Sub() newItem.SubItems.Add(""))
             Me.Invoke(Sub() newItem.SubItems.Add("Processing"))
         End If
-
+        Me.Invoke(Sub() ListView1.EndUpdate())
     End Sub
     Private Sub updateFinishedListViewItem(itemIndex As Integer, outputFilePath As String)
 
@@ -175,7 +185,10 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         'Cannot be set to less threads than is available on the CPU or it wont work. :(
-        ThreadPool.SetMaxThreads(4, 4)
+        Dim setMaxThreadsSuccess = ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount)
+        If Not setMaxThreadsSuccess Then
+            MsgBox("Error setting max threads")
+        End If
     End Sub
 
     Private Sub ListView1_KeyDown(sender As Object, e As KeyEventArgs) Handles ListView1.KeyDown
