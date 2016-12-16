@@ -188,6 +188,10 @@ Public Class Form1
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'Double buffer listview to prevent flickering
+        Dim controlProperty As System.Reflection.PropertyInfo = GetType(System.Windows.Forms.Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
+        controlProperty.SetValue(ListView1, True, Nothing)
+
         'Cannot be set to less threads than is available on the CPU or it wont work. :(
         Dim setMaxThreadsSuccess = ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount)
         If Not setMaxThreadsSuccess Then
@@ -227,5 +231,9 @@ Public Class Form1
                 addFileToList(filePath)
             Next
         End If
+    End Sub
+
+    Private Sub OptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OptionsToolStripMenuItem.Click
+
     End Sub
 End Class
