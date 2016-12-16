@@ -18,6 +18,16 @@ Public Class Form1
             Return bytes.ToString
         End If
     End Function
+
+    Private Sub addFileToList(filePath As String)
+        Dim currentFile As New FileInfo(filePath)
+        Dim newItem As New ListViewItem
+        newItem.Text = currentFile.Name
+        newItem.Tag = currentFile.FullName
+        newItem.SubItems.Add(convertBytesToAppropriateScale(currentFile.Length))
+        newItem.SubItems.Item(1).Tag = currentFile.Length
+        ListView1.Items.Add(newItem)
+    End Sub
 #End Region
 
 #Region "Optimise"
@@ -169,13 +179,7 @@ Public Class Form1
     Private Sub ListView1_DragDrop(sender As Object, e As DragEventArgs) Handles ListView1.DragDrop
         Dim files() As String = e.Data.GetData(DataFormats.FileDrop)
         For Each path In files
-            Dim currentFile As New FileInfo(path)
-            Dim newItem As New ListViewItem
-            newItem.Text = currentFile.Name
-            newItem.Tag = currentFile.FullName
-            newItem.SubItems.Add(convertBytesToAppropriateScale(currentFile.Length))
-            newItem.SubItems.Item(1).Tag = currentFile.Length
-            ListView1.Items.Add(newItem)
+            addFileToList(path)
         Next
     End Sub
 
@@ -211,6 +215,17 @@ Public Class Form1
             Else
                 saveLocation = fbd.SelectedPath
             End If
+        End If
+    End Sub
+
+    Private Sub ToolStripMenuItem3_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem3.Click
+        Dim ofd As New OpenFileDialog
+        ofd.Filter = "All images|*.jpg;*.jpeg"
+        ofd.Multiselect = True
+        If ofd.ShowDialog = Windows.Forms.DialogResult.OK Then
+            For Each filePath In ofd.FileNames
+                addFileToList(filePath)
+            Next
         End If
     End Sub
 End Class
