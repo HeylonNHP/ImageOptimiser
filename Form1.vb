@@ -32,6 +32,7 @@ Public Class Form1
 
 #Region "Optimise"
     Public processPriority = ProcessPriorityClass.Idle
+    Public copyExif As Integer = 1
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Private Sub optimiseImages()
@@ -74,12 +75,21 @@ Public Class Form1
 
         updateProcessingListViewItem(itemIndex)
 
+        Dim exifdata
+        If copyExif = 0 Then
+            exifdata = "-copy none"
+        ElseIf copyExif = 1 Then
+            exifdata = "-copy comments"
+        ElseIf copyExif = 2 Then
+            exifdata = "-copy all"
+        End If
+
         Dim JPEGtranProcess As New Process
 
         With JPEGtranProcess.StartInfo
             .FileName = JPEGtranLocation
-            .Arguments = String.Format("-optimize -progressive -outfile {0} {1}", _
-                                      """" + outputFilePath + """", """" + inputFilePath + """")
+            .Arguments = String.Format("-optimize -progressive {2} -outfile {0} {1}", _
+                                      """" + outputFilePath + """", """" + inputFilePath + """", exifdata)
             .UseShellExecute = False
             .CreateNoWindow = True
         End With

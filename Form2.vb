@@ -15,6 +15,15 @@
         ElseIf Form1.processPriority = ProcessPriorityClass.RealTime Then
             ComboBox1.SelectedIndex = 0
         End If
+
+        'copy exif
+        If Form1.copyExif = 0 Then
+            RadioButton1.Checked = True
+        ElseIf Form1.copyExif = 1 Then
+            RadioButton2.Checked = True
+        ElseIf Form1.copyExif = 2 Then
+            RadioButton3.Checked = True
+        End If
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -31,6 +40,14 @@
             Form1.processPriority = ProcessPriorityClass.BelowNormal
         ElseIf ComboBox1.SelectedIndex = 5 Then
             Form1.processPriority = ProcessPriorityClass.Idle
+        End If
+        'copy exif
+        If RadioButton1.Checked Then
+            Form1.copyExif = 0
+        ElseIf RadioButton2.Checked Then
+            Form1.copyExif = 1
+        ElseIf RadioButton3.Checked Then
+            Form1.copyExif = 2
         End If
         Me.Close()
     End Sub
