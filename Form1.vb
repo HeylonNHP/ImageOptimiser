@@ -31,6 +31,7 @@ Public Class Form1
 #End Region
 
 #Region "Optimise"
+    Public processPriority = ProcessPriorityClass.Idle
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Private Sub optimiseImages()
@@ -59,7 +60,7 @@ Public Class Form1
         optimiseJPEG(parameters(0), parameters(1), parameters(2))
 
         'Re-enable optimise button if this is the last image that has been optimised
-        
+
         Dim worker As Integer = 0
         Dim io As Integer = 0
         ThreadPool.GetAvailableThreads(worker, io)
@@ -85,7 +86,7 @@ Public Class Form1
 
         JPEGtranProcess.Start()
 
-        JPEGtranProcess.PriorityClass = ProcessPriorityClass.Idle
+        JPEGtranProcess.PriorityClass = processPriority
 
         While Not JPEGtranProcess.HasExited
             Thread.Sleep(100)
@@ -234,6 +235,6 @@ Public Class Form1
     End Sub
 
     Private Sub OptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OptionsToolStripMenuItem.Click
-
+        Form2.Show()
     End Sub
 End Class
