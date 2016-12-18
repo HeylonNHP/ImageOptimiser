@@ -24,6 +24,10 @@
         ElseIf Form1.copyExif = 2 Then
             RadioButton3.Checked = True
         End If
+        'huffman table
+        CheckBox1.Checked = Form1.optimiseHuffmanTable
+        'progressive
+        CheckBox2.Checked = Form1.convertToProgressive
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -49,6 +53,12 @@
         ElseIf RadioButton3.Checked Then
             Form1.copyExif = 2
         End If
+
+        'huffman table
+        Form1.optimiseHuffmanTable = CheckBox1.Checked
+        'progressive
+        Form1.convertToProgressive = CheckBox2.Checked
+
         Me.Close()
     End Sub
 End Class

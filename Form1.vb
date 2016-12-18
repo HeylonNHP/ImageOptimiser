@@ -33,6 +33,8 @@ Public Class Form1
 #Region "Optimise"
     Public processPriority = ProcessPriorityClass.Idle
     Public copyExif As Integer = 1
+    Public optimiseHuffmanTable As Boolean = True
+    Public convertToProgressive As Boolean = True
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Private Sub optimiseImages()
@@ -75,6 +77,7 @@ Public Class Form1
 
         updateProcessingListViewItem(itemIndex)
 
+        'Exif data
         Dim exifdata
         If copyExif = 0 Then
             exifdata = "-copy none"
@@ -84,12 +87,29 @@ Public Class Form1
             exifdata = "-copy all"
         End If
 
+        'Huffman table
+        Dim huffmanTable
+        If optimiseHuffmanTable Then
+            huffmanTable = "-optimize"
+        Else
+            huffmanTable = ""
+        End If
+
+        'progressive
+        Dim progressive
+        If convertToProgressive Then
+            progressive = "-progressive"
+        Else
+            progressive = ""
+        End If
+
         Dim JPEGtranProcess As New Process
 
         With JPEGtranProcess.StartInfo
             .FileName = JPEGtranLocation
-            .Arguments = String.Format("-optimize -progressive {2} -outfile {0} {1}", _
-                                      """" + outputFilePath + """", """" + inputFilePath + """", exifdata)
+            .Arguments = String.Format("-optimize -progressive {2} {3} {4} -outfile {0} {1}", _
+                                      """" + outputFilePath + """", """" + inputFilePath + """", exifdata, _
+                                      huffmanTable, progressive)
             .UseShellExecute = False
             .CreateNoWindow = True
         End With
