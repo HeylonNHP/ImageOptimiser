@@ -1,7 +1,7 @@
 # ImageOptimiser
 Easy to use image optimiser GUI
 
-Designed to be similar to PNGGauntlet, but with the added ability to lossessly optimise JPEG's using JPEGtran, and possibly in future to convert PNG's to FLIF when specified.
+Designed to be similar to PNGGauntlet, but with the added ability to <b>lossessly</b> optimise JPEG's using JPEGtran, and possibly in future to convert PNG's to FLIF when specified.
 <p>
 <b>Currently can do:</b><br>
 
@@ -14,4 +14,5 @@ Set process priority of optimisers<br></p>
 <b>Plans</b><br>
 Add PNG optimiser (Same as included in PNGGauntlet)<br>
 Add PNG > FLIF<br>
+Add the ability to use -scans in JPEGtran to provide further JPEG optimisation at the cost of speed (not sure how to use this switch yet)<br>
 </p>
