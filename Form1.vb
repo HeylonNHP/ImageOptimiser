@@ -23,6 +23,17 @@ Public Class Form1
     Private Sub addFileToList(filePath As String)
         If (My.Computer.FileSystem.FileExists(filePath)) Then
             Dim currentFile As New FileInfo(filePath)
+
+            Dim supported As Boolean = False
+            For Each fileType In supportedFormats.Keys
+                If supportedFormats(fileType).Contains(currentFile.Extension.ToLower) Then
+                    supported = True
+                End If
+            Next
+            If Not supported Then
+                Exit Sub
+            End If
+
             Dim newItem As New ListViewItem
             newItem.Text = currentFile.Name
             newItem.Tag = currentFile.FullName
