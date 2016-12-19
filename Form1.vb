@@ -2,6 +2,7 @@
 Imports System.Threading
 
 Public Class Form1
+    Public Const settingsFilePath = "settings.ini"
 #Region "Basic functions"
     Private Function convertBytesToAppropriateScale(bytes As Long, Optional precision As Integer = 2)
         If bytes < 1024 Then
@@ -35,6 +36,35 @@ Public Class Form1
             For Each Dirpath In My.Computer.FileSystem.GetDirectories(filePath)
                 addFileToList(Dirpath)
             Next
+        End If
+    End Sub
+
+    Private Sub saveSettings()
+        Dim settingsDict As New Dictionary(Of String, String)
+        settingsDict.Add("processPriority", processPriority)
+        settingsDict.Add("copyExif", copyExif)
+        settingsDict.Add("optimiseHuffmanTable", optimiseHuffmanTable)
+        settingsDict.Add("convertToProgressive", convertToProgressive)
+        settingsDict.Add("saveLocation", saveLocation)
+        SettingsFile.saveSettings(settingsDict, settingsFilePath)
+    End Sub
+    Private Sub loadSettings()
+        Dim settingsDict As Dictionary(Of String, String) = SettingsFile.loadSettings(settingsFilePath)
+        
+        If settingsDict.ContainsKey("processPriority") Then
+            processPriority = Int(settingsDict("processPriority"))
+        End If
+        If settingsDict.ContainsKey("copyExif") Then
+            copyExif = Int(settingsDict("copyExif"))
+        End If
+        If settingsDict.ContainsKey("optimiseHuffmanTable") Then
+            optimiseHuffmanTable = CType(settingsDict("optimiseHuffmanTable"), Boolean)
+        End If
+        If settingsDict.ContainsKey("convertToProgressive") Then
+            convertToProgressive = CType(settingsDict("convertToProgressive"), Boolean)
+        End If
+        If settingsDict.ContainsKey("saveLocation") Then
+            saveLocation = settingsDict("saveLocation")
         End If
     End Sub
 #End Region
@@ -224,6 +254,7 @@ Public Class Form1
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        loadSettings()
         'Double buffer listview to prevent flickering
         Dim controlProperty As System.Reflection.PropertyInfo = GetType(System.Windows.Forms.Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic Or System.Reflection.BindingFlags.Instance)
         controlProperty.SetValue(ListView1, True, Nothing)
@@ -287,5 +318,9 @@ Public Class Form1
         If visibleScrollbars.IsHScrollVisible(ListView1) Then
             ListView1.Update()
         End If
+    End Sub
+
+    Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        saveSettings()
     End Sub
 End Class
