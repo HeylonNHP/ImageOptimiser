@@ -56,6 +56,7 @@ Public Class Form1
         settingsDict.Add("copyExif", copyExif)
         settingsDict.Add("optimiseHuffmanTable", optimiseHuffmanTable)
         settingsDict.Add("convertToProgressive", convertToProgressive)
+        settingsDict.Add("arithmeticCoding", arithmeticCoding)
         settingsDict.Add("saveLocation", saveLocation)
         SettingsFile.saveSettings(settingsDict, settingsFilePath)
     End Sub
@@ -74,6 +75,9 @@ Public Class Form1
         If settingsDict.ContainsKey("convertToProgressive") Then
             convertToProgressive = CType(settingsDict("convertToProgressive"), Boolean)
         End If
+        If settingsDict.ContainsKey("arithmeticCoding") Then
+            arithmeticCoding = CType(settingsDict("arithmeticCoding"), Boolean)
+        End If
         If settingsDict.ContainsKey("saveLocation") Then
             saveLocation = settingsDict("saveLocation")
         End If
@@ -87,6 +91,7 @@ Public Class Form1
     Public copyExif As Integer = 1
     Public optimiseHuffmanTable As Boolean = True
     Public convertToProgressive As Boolean = True
+    Public arithmeticCoding As Boolean = False
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Private Sub optimiseImages()
@@ -155,13 +160,20 @@ Public Class Form1
             progressive = ""
         End If
 
+        Dim arithmetic
+        If arithmeticCoding Then
+            arithmetic = "-arithmetic"
+        Else
+            arithmetic = ""
+        End If
+
         Dim JPEGtranProcess As New Process
 
         With JPEGtranProcess.StartInfo
             .FileName = JPEGtranLocation
-            .Arguments = String.Format("-optimize -progressive {2} {3} {4} -outfile {0} {1}", _
+            .Arguments = String.Format("-optimize -progressive {2} {3} {4} {5} -outfile {0} {1}", _
                                       """" + outputFilePath + """", """" + inputFilePath + """", exifdata, _
-                                      huffmanTable, progressive)
+                                      huffmanTable, progressive, arithmetic)
             .UseShellExecute = False
             .CreateNoWindow = True
         End With

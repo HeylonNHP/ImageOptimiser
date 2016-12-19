@@ -28,6 +28,8 @@
         CheckBox1.Checked = Form1.optimiseHuffmanTable
         'progressive
         CheckBox2.Checked = Form1.convertToProgressive
+        'arithmetic
+        CheckBox3.Checked = Form1.arithmeticCoding
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -58,7 +60,8 @@
         Form1.optimiseHuffmanTable = CheckBox1.Checked
         'progressive
         Form1.convertToProgressive = CheckBox2.Checked
-
+        'arithmetic
+        Form1.arithmeticCoding = CheckBox3.Checked
         Me.Close()
     End Sub
 End Class
