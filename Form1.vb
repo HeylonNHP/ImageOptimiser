@@ -268,9 +268,11 @@ Public Class Form1
 
     Private Sub ListView1_KeyDown(sender As Object, e As KeyEventArgs) Handles ListView1.KeyDown
         If e.KeyCode = Keys.Delete Then
+            ListView1.BeginUpdate()
             For i As Integer = ListView1.SelectedIndices.Count - 1 To 0 Step -1
                 ListView1.Items.RemoveAt(ListView1.SelectedIndices(i))
             Next
+            ListView1.EndUpdate()
         End If
     End Sub
 
@@ -322,5 +324,9 @@ Public Class Form1
 
     Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
         saveSettings()
+    End Sub
+
+    Private Sub ListView1_DoubleClick(sender As Object, e As EventArgs) Handles ListView1.DoubleClick
+        Process.Start(ListView1.SelectedItems(0).Tag)
     End Sub
 End Class
