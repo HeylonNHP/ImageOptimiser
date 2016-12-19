@@ -3,7 +3,7 @@ Imports System.Threading
 
 Public Class Form1
 #Region "Basic functions"
-    Private Function convertBytesToAppropriateScale(bytes As Integer, Optional precision As Integer = 2)
+    Private Function convertBytesToAppropriateScale(bytes As Long, Optional precision As Integer = 2)
         If bytes < 1024 Then
             Return String.Format("{0} bytes", bytes)
         ElseIf bytes < (1024 ^ 2) Then
@@ -20,17 +20,28 @@ Public Class Form1
     End Function
 
     Private Sub addFileToList(filePath As String)
-        Dim currentFile As New FileInfo(filePath)
-        Dim newItem As New ListViewItem
-        newItem.Text = currentFile.Name
-        newItem.Tag = currentFile.FullName
-        newItem.SubItems.Add(convertBytesToAppropriateScale(currentFile.Length))
-        newItem.SubItems.Item(1).Tag = currentFile.Length
-        ListView1.Items.Add(newItem)
+        If (My.Computer.FileSystem.FileExists(filePath)) Then
+            Dim currentFile As New FileInfo(filePath)
+            Dim newItem As New ListViewItem
+            newItem.Text = currentFile.Name
+            newItem.Tag = currentFile.FullName
+            newItem.SubItems.Add(convertBytesToAppropriateScale(currentFile.Length))
+            newItem.SubItems.Item(1).Tag = currentFile.Length
+            ListView1.Items.Add(newItem)
+        ElseIf My.Computer.FileSystem.DirectoryExists(filePath) Then
+            For Each Filepath1 In My.Computer.FileSystem.GetFiles(filePath)
+                addFileToList(Filepath1)
+            Next
+            For Each Dirpath In My.Computer.FileSystem.GetDirectories(filePath)
+                addFileToList(Dirpath)
+            Next
+        End If
     End Sub
 #End Region
 
 #Region "Optimise"
+    Public supportedFormats As New Dictionary(Of String, String()) From {{"JPEG", {".jpg", ".jpeg"}}, _
+                                                                      {"PNG", {".png"}}}
     Public processPriority = ProcessPriorityClass.Idle
     Public copyExif As Integer = 1
     Public optimiseHuffmanTable As Boolean = True
@@ -52,7 +63,7 @@ Public Class Form1
             End If
 
             'Detirmine file type and apply appropriate optimisation
-            If currentFile.Extension.ToLower = ".jpg" Or currentFile.Extension.ToLower = ".jpeg" Then
+            If supportedFormats("JPEG").Contains(currentFile.Extension.ToLower) Then
                 Dim jpegOptimWCB As WaitCallback = New WaitCallback(AddressOf optimiseJPEGthread)
                 ThreadPool.QueueUserWorkItem(jpegOptimWCB, {currentFile.FullName, outputFilename, i})
             End If
@@ -191,12 +202,6 @@ Public Class Form1
     End Function
 #End Region
     Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
-
-        Dim otherColumnsWith As Integer = 0
-        For i = 1 To ListView1.Columns.Count - 1
-            otherColumnsWith += ListView1.Columns.Item(i).Width
-        Next
-        ListView1.Columns.Item(0).Width = ListView1.Width - otherColumnsWith - 4
     End Sub
 
     Private Sub ListView1_DragEnter(sender As Object, e As DragEventArgs) Handles ListView1.DragEnter
@@ -266,5 +271,21 @@ Public Class Form1
 
     Private Sub OptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OptionsToolStripMenuItem.Click
         Form2.Show()
+    End Sub
+
+    Private Sub ListView1_ClientSizeChanged(sender As Object, e As EventArgs) Handles ListView1.ClientSizeChanged
+
+        Dim otherColumnsWith As Integer = 0
+        For i = 1 To ListView1.Columns.Count - 1
+            otherColumnsWith += ListView1.Columns.Item(i).Width
+        Next
+        If visibleScrollbars.IsVScrollVisible(ListView1) Then
+            ListView1.Columns.Item(0).Width = ListView1.Width - otherColumnsWith - 22
+        Else
+            ListView1.Columns.Item(0).Width = ListView1.Width - otherColumnsWith - 4
+        End If
+        If visibleScrollbars.IsHScrollVisible(ListView1) Then
+            ListView1.Update()
+        End If
     End Sub
 End Class
