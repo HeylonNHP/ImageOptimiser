@@ -176,8 +176,10 @@ Public Class Form1
 
         Try
             If ToolStripMenuItem2.CheckState = CheckState.Checked Then
-                My.Computer.FileSystem.DeleteFile(inputFilePath)
-                My.Computer.FileSystem.RenameFile(outputFilePath, inputFileInfo.Name)
+                If My.Computer.FileSystem.FileExists(outputFilePath) Then
+                    My.Computer.FileSystem.DeleteFile(inputFilePath)
+                    My.Computer.FileSystem.RenameFile(outputFilePath, inputFileInfo.Name)
+                End If
                 updateFinishedListViewItem(itemIndex, inputFilePath)
             Else
                 updateFinishedListViewItem(itemIndex, outputFilePath)
