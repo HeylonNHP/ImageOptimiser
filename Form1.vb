@@ -94,6 +94,10 @@ Public Class Form1
     Public arithmeticCoding As Boolean = False
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
+    Public Const OptiPngLocation As String = "bins\optipng0.7.6.exe"
+    Public Const PngoutLocation As String = "bins\pngout.exe"
+    Public Const DefloptLocation As String = "bins\DeflOpt.exe"
+
     Private Sub optimiseImages()
         Button1.Enabled = False
         For i As Integer = 0 To ListView1.Items.Count - 1
@@ -112,6 +116,9 @@ Public Class Form1
             If supportedFormats("JPEG").Contains(currentFile.Extension.ToLower) Then
                 Dim jpegOptimWCB As WaitCallback = New WaitCallback(AddressOf optimiseJPEGthread)
                 ThreadPool.QueueUserWorkItem(jpegOptimWCB, {currentFile.FullName, outputFilename, i})
+            ElseIf supportedFormats("PNG").Contains(currentFile.Extension.ToLower) Then
+                Dim pngOptimWCB As WaitCallback = New WaitCallback(AddressOf optimisePNGthread)
+                ThreadPool.QueueUserWorkItem(pngOptimWCB, {currentFile.FullName, outputFilename, i})
             End If
         Next
     End Sub
@@ -120,13 +127,7 @@ Public Class Form1
         optimiseJPEG(parameters(0), parameters(1), parameters(2))
 
         'Re-enable optimise button if this is the last image that has been optimised
-
-        Dim worker As Integer = 0
-        Dim io As Integer = 0
-        ThreadPool.GetAvailableThreads(worker, io)
-        If (worker >= Environment.ProcessorCount - 1 And io >= Environment.ProcessorCount - 1) Then
-            Me.Invoke(Sub() Button1.Enabled = True)
-        End If
+        reenableOptimiseButtonOnJobFinish()
     End Sub
     Private Sub optimiseJPEG(inputFilePath As String, outputFilePath As String, itemIndex As Integer)
         Dim inputFileInfo As New FileInfo(inputFilePath)
@@ -204,6 +205,144 @@ Public Class Form1
         Debug.Print(inputFilePath + " Ended")
     End Sub
 
+    Private Sub optimisePNGthread(parameters As Array)
+        optimisePNG(parameters(0), parameters(1), parameters(2))
+
+        reenableOptimiseButtonOnJobFinish()
+    End Sub
+
+    Private Sub optimisePNG(inputFilePath As String, outputFilePath As String, itemIndex As Integer)
+        Dim inputFileInfo As New FileInfo(inputFilePath)
+        outputFilePath = getNonExistingPath(outputFilePath, inputFileInfo.Extension)
+
+        updateProcessingListViewItem(itemIndex)
+
+        optiPNGoptimise(inputFileInfo.FullName, outputFilePath)
+
+        pngOUToptimise(outputFilePath, outputFilePath)
+
+        deflOptOptimise(outputFilePath)
+
+        Try
+            If ToolStripMenuItem2.CheckState = CheckState.Checked Then
+                If My.Computer.FileSystem.FileExists(outputFilePath) Then
+                    My.Computer.FileSystem.DeleteFile(inputFilePath)
+                    My.Computer.FileSystem.RenameFile(outputFilePath, inputFileInfo.Name)
+                End If
+                updateFinishedListViewItem(itemIndex, inputFilePath)
+            Else
+                updateFinishedListViewItem(itemIndex, outputFilePath)
+            End If
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Private Sub optiPNGoptimise(inputFilePath As String, outputFilePath As String, Optional preserve As Boolean = True, _
+                                Optional optimiserLevel As Integer = 7)
+        Dim optiPNGprocess As New Process
+
+        Dim arguments As String = ""
+
+        If preserve Then
+            arguments += "-preserve "
+        End If
+
+        arguments += String.Format("-o{0} ", optimiserLevel)
+
+        arguments += String.Format("-out ""{0}"" ", outputFilePath)
+
+        arguments += """" + inputFilePath + """"
+
+        With optiPNGprocess.StartInfo
+            .FileName = OptiPngLocation
+            .Arguments = arguments
+            .UseShellExecute = False
+            .CreateNoWindow = True
+        End With
+
+        optiPNGprocess.Start()
+        optiPNGprocess.PriorityClass = processPriority
+
+        While Not optiPNGprocess.HasExited
+            Thread.Sleep(100)
+        End While
+    End Sub
+
+    Private Sub pngOUToptimise(inputFilePath As String, outputFilePath As String, Optional overwriteFile As Boolean = True, _
+                               Optional bitdepth As Integer = 0, Optional strategy As Integer = 0, _
+                               Optional keepChunks As String = "t", Optional mincodes As Integer = 0)
+        Dim pngOUTprocess As New Process
+
+        Dim arguments As String = ""
+
+        arguments += String.Format("""{0}""", inputFilePath)
+        arguments += String.Format(" ""{0}""", outputFilePath)
+
+        If overwriteFile Then
+            arguments += " /y"
+        End If
+
+        arguments += String.Format(" /d{0}", bitdepth)
+
+        arguments += String.Format(" /s{0}", strategy)
+
+        If Not keepChunks = String.Empty Then
+            arguments += String.Format(" /k{0}", keepChunks)
+        End If
+
+        arguments += String.Format(" /mincodes{0}", mincodes)
+
+        With pngOUTprocess.StartInfo
+            .FileName = PngoutLocation
+            .Arguments = arguments
+            .UseShellExecute = False
+            .CreateNoWindow = True
+        End With
+
+        pngOUTprocess.Start()
+        pngOUTprocess.PriorityClass = processPriority
+
+        While Not pngOUTprocess.HasExited
+            Thread.Sleep(100)
+        End While
+    End Sub
+
+    Private Sub deflOptOptimise(inputFilePath As String, Optional preserveDateAndTime As Boolean = True)
+        Dim deflOptProcess As New Process
+
+        Dim arguments As String = ""
+
+        If preserveDateAndTime Then
+            arguments += "/d "
+        End If
+
+        arguments += String.Format("""{0}""", inputFilePath)
+
+        With deflOptProcess.StartInfo
+            .FileName = DefloptLocation
+            .Arguments = arguments
+            .UseShellExecute = False
+            .CreateNoWindow = True
+        End With
+
+        deflOptProcess.Start()
+        deflOptProcess.PriorityClass = processPriority
+
+        While Not deflOptProcess.HasExited
+            Thread.Sleep(100)
+        End While
+    End Sub
+    Private Sub reenableOptimiseButtonOnJobFinish()
+        Dim worker As Integer = 0
+        Dim io As Integer = 0
+        ThreadPool.GetAvailableThreads(worker, io)
+        If (worker >= Environment.ProcessorCount - 1 And io >= Environment.ProcessorCount - 1) Then
+            Me.Invoke(Sub() Button1.Enabled = True)
+        End If
+    End Sub
+
     Private Sub updateProcessingListViewItem(itemIndex As Integer)
         Dim currentItem As ListViewItem
         Me.Invoke(Sub() currentItem = ListView1.Items.Item(itemIndex))
@@ -238,7 +377,8 @@ Public Class Form1
         newItem.SubItems.Add(convertBytesToAppropriateScale(currentFileInfo.Length))
         newItem.SubItems.Item(2).Tag = currentFileInfo.Length
 
-        Dim spaceSavedPercentage = Math.Round((Val(currentItem.SubItems.Item(1).Tag) / currentFileInfo.Length) * 100 - 100, 2)
+        'Dim spaceSavedPercentage = Math.Round((Val(currentItem.SubItems.Item(1).Tag) / currentFileInfo.Length) * 100 - 100, 2)
+        Dim spaceSavedPercentage = Math.Round(((Val(currentItem.SubItems.Item(1).Tag) - currentFileInfo.Length) / Val(currentItem.SubItems.Item(1).Tag)) * 100, 2)
 
         newItem.SubItems.Add(spaceSavedPercentage.ToString + "%")
         newItem.SubItems.Add("Done")
@@ -256,6 +396,7 @@ Public Class Form1
         Return inputPath + extention
     End Function
 #End Region
+
     Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
     End Sub
 
