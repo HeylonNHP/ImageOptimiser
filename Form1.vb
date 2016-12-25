@@ -181,7 +181,9 @@ Public Class Form1
 
         JPEGtranProcess.Start()
 
-        JPEGtranProcess.PriorityClass = processPriority
+        If Not JPEGtranProcess.HasExited Then
+            JPEGtranProcess.PriorityClass = processPriority
+        End If
 
         While Not JPEGtranProcess.HasExited
             Thread.Sleep(100)
@@ -263,7 +265,9 @@ Public Class Form1
         End With
 
         optiPNGprocess.Start()
-        optiPNGprocess.PriorityClass = processPriority
+        If Not optiPNGprocess.HasExited Then
+            optiPNGprocess.PriorityClass = processPriority
+        End If
 
         While Not optiPNGprocess.HasExited
             Thread.Sleep(100)
@@ -302,7 +306,9 @@ Public Class Form1
         End With
 
         pngOUTprocess.Start()
-        pngOUTprocess.PriorityClass = processPriority
+        If Not pngOUTprocess.HasExited Then
+            pngOUTprocess.PriorityClass = processPriority
+        End If
 
         While Not pngOUTprocess.HasExited
             Thread.Sleep(100)
@@ -328,7 +334,9 @@ Public Class Form1
         End With
 
         deflOptProcess.Start()
-        deflOptProcess.PriorityClass = processPriority
+        If Not deflOptProcess.HasExited Then
+            deflOptProcess.PriorityClass = processPriority
+        End If
 
         While Not deflOptProcess.HasExited
             Thread.Sleep(100)
