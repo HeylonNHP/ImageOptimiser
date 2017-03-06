@@ -30,6 +30,10 @@
         CheckBox2.Checked = Form1.convertToProgressive
         'arithmetic
         CheckBox3.Checked = Form1.arithmeticCoding
+
+        'PNG
+        'Optimisation level
+        ComboBox2.SelectedIndex = Form1.optimisationLevel
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -62,6 +66,10 @@
         Form1.convertToProgressive = CheckBox2.Checked
         'arithmetic
         Form1.arithmeticCoding = CheckBox3.Checked
+        'PNG
+        'Optimisation level
+        Form1.optimisationLevel = ComboBox2.SelectedIndex
+
         Me.Close()
     End Sub
 End Class

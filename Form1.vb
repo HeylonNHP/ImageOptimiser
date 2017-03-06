@@ -57,6 +57,8 @@ Public Class Form1
         settingsDict.Add("optimiseHuffmanTable", optimiseHuffmanTable)
         settingsDict.Add("convertToProgressive", convertToProgressive)
         settingsDict.Add("arithmeticCoding", arithmeticCoding)
+        settingsDict.Add("OptiPNGoptimisationLevel", optimisationLevel)
+
         settingsDict.Add("saveLocation", saveLocation)
         SettingsFile.saveSettings(settingsDict, settingsFilePath)
     End Sub
@@ -78,6 +80,9 @@ Public Class Form1
         If settingsDict.ContainsKey("arithmeticCoding") Then
             arithmeticCoding = CType(settingsDict("arithmeticCoding"), Boolean)
         End If
+        If settingsDict.ContainsKey("OptiPNGoptimisationLevel") Then
+            optimisationLevel = CType(settingsDict("OptiPNGoptimisationLevel"), Integer)
+        End If
         If settingsDict.ContainsKey("saveLocation") Then
             saveLocation = settingsDict("saveLocation")
         End If
@@ -88,10 +93,15 @@ Public Class Form1
     Public supportedFormats As New Dictionary(Of String, String()) From {{"JPEG", {".jpg", ".jpeg"}}, _
                                                                       {"PNG", {".png"}}}
     Public processPriority = ProcessPriorityClass.Idle
+    'JPEGtran
     Public copyExif As Integer = 1
     Public optimiseHuffmanTable As Boolean = True
     Public convertToProgressive As Boolean = True
     Public arithmeticCoding As Boolean = False
+    'OptiPNG
+    Public optimisationLevel As Integer = 7
+
+    'Other
     Public saveLocation As String = ""
     Public Const JPEGtranLocation As String = "bins\jpegtran.exe"
     Public Const OptiPngLocation As String = "bins\optipng0.7.6.exe"
@@ -219,7 +229,11 @@ Public Class Form1
 
         updateProcessingListViewItem(itemIndex)
 
-        optiPNGoptimise(inputFileInfo.FullName, outputFilePath)
+        If optimisationLevel < 8 Then
+            optiPNGoptimise(inputFileInfo.FullName, outputFilePath, optimiserLevel:=optimisationLevel)
+        ElseIf optimisationLevel = 8 Then
+            optiPNGoptimise(inputFileInfo.FullName, outputFilePath, optimiserLevel:=7, zlibMemoryLevels:="1-9")
+        End If
 
         pngOUToptimise(outputFilePath, outputFilePath)
 
@@ -241,8 +255,8 @@ Public Class Form1
         End Try
     End Sub
 
-    Private Sub optiPNGoptimise(inputFilePath As String, outputFilePath As String, Optional preserve As Boolean = True, _
-                                Optional optimiserLevel As Integer = 7)
+    Private Sub optiPNGoptimise(inputFilePath As String, outputFilePath As String, Optional preserve As Boolean = True,
+                                Optional optimiserLevel As Integer = 7, Optional zlibMemoryLevels As String = "")
         Dim optiPNGprocess As New Process
 
         Dim arguments As String = ""
@@ -252,6 +266,10 @@ Public Class Form1
         End If
 
         arguments += String.Format("-o{0} ", optimiserLevel)
+
+        If Not zlibMemoryLevels = "" Then
+            arguments += String.Format("-zm{0} ", zlibMemoryLevels)
+        End If
 
         arguments += String.Format("-out ""{0}"" ", outputFilePath)
 
@@ -467,7 +485,7 @@ Public Class Form1
 
     Private Sub ToolStripMenuItem3_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem3.Click
         Dim ofd As New OpenFileDialog
-        ofd.Filter = "All images|*.jpg;*.jpeg"
+        ofd.Filter = "All images|*.jpg;*.jpeg;*.png"
         ofd.Multiselect = True
         If ofd.ShowDialog = Windows.Forms.DialogResult.OK Then
             For Each filePath In ofd.FileNames

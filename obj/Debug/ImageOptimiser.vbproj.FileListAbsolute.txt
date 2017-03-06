@@ -9,3 +9,15 @@ C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\Im
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.pdb
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.pdb
 C:\Users\Heylon2\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Form2.resources
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.exe.config
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.exe
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.xml
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.pdb
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.exe
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.pdb
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\bin\Debug\ImageOptimiser.xml
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.vbprojResolveAssemblyReference.cache
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Form1.resources
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Form2.resources
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.Resources.resources
+C:\Users\Heylon\Google Drive\VS 2013\ImageOptimiser\ImageOptimiser\obj\Debug\ImageOptimiser.vbproj.GenerateResource.Cache
