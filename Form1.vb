@@ -466,6 +466,11 @@ Public Class Form1
             Next
             ListView1.EndUpdate()
         End If
+        If e.Modifiers = Keys.Control And e.KeyCode = Keys.A Then
+            For i As Integer = 0 To ListView1.Items.Count - 1
+                ListView1.Items.Item(i).Selected = True
+            Next
+        End If
     End Sub
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
@@ -520,5 +525,27 @@ Public Class Form1
 
     Private Sub ListView1_DoubleClick(sender As Object, e As EventArgs) Handles ListView1.DoubleClick
         Process.Start(ListView1.SelectedItems(0).Tag)
+    End Sub
+
+    Private Sub ClearAllToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ClearAllToolStripMenuItem.Click
+        If Not Button1.Enabled Then
+            MsgBox("Wait until optimization is finished")
+            Exit Sub
+        End If
+        ListView1.BeginUpdate()
+
+        For i As Integer = ListView1.Items.Count - 1 To 0 Step -1
+            ListView1.Items.RemoveAt(i)
+        Next
+        ListView1.EndUpdate()
+    End Sub
+
+    Private Sub OpenLocationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLocationToolStripMenuItem.Click
+        Dim filePath As New FileInfo(ListView1.SelectedItems(0).Tag)
+        Process.Start(filePath.Directory.FullName)
+    End Sub
+
+    Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles ContextMenuStrip1.Opening
+
     End Sub
 End Class
