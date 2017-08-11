@@ -225,17 +225,43 @@ Public Class Form1
 
     Private Sub optimisePNG(inputFilePath As String, outputFilePath As String, itemIndex As Integer)
         Dim inputFileInfo As New FileInfo(inputFilePath)
+        Dim optiPNGtempOutPath = getNonExistingPath(outputFilePath + "optiPNG", inputFileInfo.Extension)
+        Dim pngOUTtempOutPath = getNonExistingPath(outputFilePath + "pngOUT", inputFileInfo.Extension)
         outputFilePath = getNonExistingPath(outputFilePath, inputFileInfo.Extension)
 
         updateProcessingListViewItem(itemIndex)
 
         If optimisationLevel < 8 Then
-            optiPNGoptimise(inputFileInfo.FullName, outputFilePath, optimiserLevel:=optimisationLevel)
+            optiPNGoptimise(inputFileInfo.FullName, optiPNGtempOutPath, optimiserLevel:=optimisationLevel)
         ElseIf optimisationLevel = 8 Then
-            optiPNGoptimise(inputFileInfo.FullName, outputFilePath, optimiserLevel:=7, zlibMemoryLevels:="1-9")
+            optiPNGoptimise(inputFileInfo.FullName, optiPNGtempOutPath, optimiserLevel:=7, zlibMemoryLevels:="1-9")
         End If
 
-        pngOUToptimise(outputFilePath, outputFilePath)
+        'If OptiPNG crashes try using PNGout
+        Dim dontCompare As Boolean = False
+        Dim pngOUTinputPath = optiPNGtempOutPath
+        If (Not My.Computer.FileSystem.FileExists(optiPNGtempOutPath)) Then
+            pngOUTinputPath = inputFileInfo.FullName
+            pngOUTtempOutPath = outputFilePath
+            dontCompare = True
+        End If
+
+        pngOUToptimise(pngOUTinputPath, pngOUTtempOutPath)
+
+        'Set the smallest output from either optiPNG or PNGout as the output
+        Try
+            If Not dontCompare Then
+                If File.ReadAllBytes(optiPNGtempOutPath).Length > File.ReadAllBytes(pngOUTtempOutPath).Length Then
+                    My.Computer.FileSystem.CopyFile(pngOUTtempOutPath, outputFilePath)
+                    My.Computer.FileSystem.DeleteFile(optiPNGtempOutPath)
+                Else
+                    My.Computer.FileSystem.CopyFile(optiPNGtempOutPath, outputFilePath)
+                    My.Computer.FileSystem.DeleteFile(pngOUTtempOutPath)
+                End If
+            End If
+        Catch ex As Exception
+            updateFinishedListViewItem(itemIndex, outputFilePath, successfulCompletion:=False)
+        End Try
 
         deflOptOptimise(outputFilePath)
 
@@ -387,7 +413,7 @@ Public Class Form1
         End If
         Me.Invoke(Sub() ListView1.EndUpdate())
     End Sub
-    Private Sub updateFinishedListViewItem(itemIndex As Integer, outputFilePath As String)
+    Private Sub updateFinishedListViewItem(itemIndex As Integer, outputFilePath As String, Optional successfulCompletion As Boolean = True)
 
         Dim currentItem As ListViewItem
         Me.Invoke(Sub() currentItem = ListView1.Items.Item(itemIndex))
@@ -407,7 +433,12 @@ Public Class Form1
         Dim spaceSavedPercentage = Math.Round(((Val(currentItem.SubItems.Item(1).Tag) - currentFileInfo.Length) / Val(currentItem.SubItems.Item(1).Tag)) * 100, 2)
 
         newItem.SubItems.Add(spaceSavedPercentage.ToString + "%")
-        newItem.SubItems.Add("Done")
+        If successfulCompletion Then
+            newItem.SubItems.Add("Done")
+        Else
+            newItem.SubItems.Add("Error 😥")
+        End If
+
 
         Me.Invoke(Sub() ListView1.Items.Item(itemIndex) = newItem)
 
@@ -417,7 +448,9 @@ Public Class Form1
         While My.Computer.FileSystem.FileExists(inputPath + extention)
             If Not My.Computer.FileSystem.FileExists(String.Format("{0}{1}{2}", inputPath, count, extention)) Then
                 inputPath = String.Format("{0}{1}", inputPath, count)
+                Exit While
             End If
+            count += 1
         End While
         Return inputPath + extention
     End Function
@@ -532,12 +565,7 @@ Public Class Form1
             MsgBox("Wait until optimization is finished")
             Exit Sub
         End If
-        ListView1.BeginUpdate()
-
-        For i As Integer = ListView1.Items.Count - 1 To 0 Step -1
-            ListView1.Items.RemoveAt(i)
-        Next
-        ListView1.EndUpdate()
+        ListView1.Items.Clear()
     End Sub
 
     Private Sub OpenLocationToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenLocationToolStripMenuItem.Click
